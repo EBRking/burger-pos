@@ -1,0 +1,134 @@
+<%- include('partials/head') %>
+<%- include('partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">🏠 <span>แดชบอร์ด</span></h1>
+    <span style="font-size:0.85rem; color:#999;">วันที่: <%= new Date().toLocaleDateString('th-TH', {weekday:'long', year:'numeric', month:'long', day:'numeric'}) %></span>
+  </div>
+
+  <% if (success && success.length > 0) { %><div class="alert alert-success">✅ <%= success[0] %></div><% } %>
+  <% if (error && error.length > 0) { %><div class="alert alert-danger">⚠️ <%= error[0] %></div><% } %>
+
+  <div class="stat-grid">
+    <div class="stat-card green">
+      <div class="stat-icon">💰</div>
+      <div>
+        <div class="stat-value">฿<%= todayRevenue.toLocaleString('th-TH', {minimumFractionDigits:2}) %></div>
+        <div class="stat-label">ยอดขายวันนี้</div>
+      </div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-icon">🛒</div>
+      <div>
+        <div class="stat-value"><%= todayOrders %></div>
+        <div class="stat-label">ออเดอร์วันนี้</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <div>
+        <div class="stat-value">฿<%= monthRevenue.toLocaleString('th-TH', {minimumFractionDigits:2}) %></div>
+        <div class="stat-label">ยอดขายเดือนนี้</div>
+      </div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-icon">👥</div>
+      <div>
+        <div class="stat-value"><%= totalMembers %></div>
+        <div class="stat-label">สมาชิกทั้งหมด</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🍟</div>
+      <div>
+        <div class="stat-value"><%= totalProducts %></div>
+        <div class="stat-label">สินค้าทั้งหมด</div>
+      </div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">⚠️</div>
+      <div>
+        <div class="stat-value"><%= lowStockProducts.length %></div>
+        <div class="stat-label">สินค้าใกล้หมด</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📈 ยอดขาย 7 วันล่าสุด</span>
+      </div>
+      <canvas id="salesChart" height="120"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⚠️ สินค้าใกล้หมด</span>
+        <a href="/products" class="btn btn-sm btn-secondary">ดูทั้งหมด</a>
+      </div>
+      <% if (lowStockProducts.length === 0) { %>
+        <p style="color:#999; text-align:center; padding:20px;">ไม่มีสินค้าใกล้หมด</p>
+      <% } else { %>
+        <% lowStockProducts.forEach(p => { %>
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+            <span style="font-size:0.85rem;"><%= p.name %></span>
+            <span class="badge badge-danger"><%= p.stock %> <%= p.unit %></span>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <div class="card-header">
+      <span class="card-title">🧾 ออเดอร์ล่าสุด</span>
+      <a href="/sales" class="btn btn-sm btn-secondary">ดูทั้งหมด</a>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>รหัส</th><th>พนักงาน</th><th>สมาชิก</th><th>ยอดรวม</th><th>ช่องทาง</th><th>เวลา</th></tr></thead>
+        <tbody>
+          <% recentSales.forEach(s => { %>
+          <tr>
+            <td><a href="/sales/receipt/<%= s._id %>" style="color:var(--primary); font-weight:600;"><%= s.saleCode %></a></td>
+            <td><%= s.employee ? s.employee.name : '-' %></td>
+            <td><%= s.member ? s.member.name : 'ทั่วไป' %></td>
+            <td style="font-weight:600; color:var(--primary);">฿<%= s.total.toLocaleString('th-TH', {minimumFractionDigits:2}) %></td>
+            <td><span class="badge badge-info"><%= s.paymentMethod === 'cash' ? '💵 เงินสด' : s.paymentMethod === 'transfer' ? '📱 โอน' : '💳 บัตร' %></span></td>
+            <td style="font-size:0.78rem; color:#999;"><%= new Date(s.createdAt).toLocaleString('th-TH') %></td>
+          </tr>
+          <% }) %>
+          <% if (recentSales.length === 0) { %>
+          <tr><td colspan="6" style="text-align:center; color:#999; padding:20px;">ยังไม่มีข้อมูลการขาย</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const data = <%- weeklyData %>;
+const ctx = document.getElementById('salesChart').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: data.map(d => d.date),
+    datasets: [{
+      label: 'ยอดขาย (฿)',
+      data: data.map(d => d.revenue),
+      backgroundColor: 'rgba(210,105,30,0.7)',
+      borderColor: '#D2691E',
+      borderWidth: 1,
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { callback: v => '฿' + v.toLocaleString() } } }
+  }
+});
+</script>
+</body></html>

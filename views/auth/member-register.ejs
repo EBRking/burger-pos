@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สมัครสมาชิก | Burger POS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background: linear-gradient(135deg, #D4724A 0%, #E8A87C 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 500px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      color: #D4724A;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .header p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #E8A87C;
+      border-radius: 5px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #D4724A;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .form-row .form-group {
+      margin-bottom: 0;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #D4724A 0%, #E8A87C 100%);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    .alert {
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+    .alert-error {
+      background: #FFE0E0;
+      color: #D32F2F;
+      border: 1px solid #D32F2F;
+    }
+    .alert-success {
+      background: #E0F2E0;
+      color: #2E7D32;
+      border: 1px solid #2E7D32;
+    }
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+    }
+    .login-link a {
+      color: #D4724A;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #D4724A;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/auth/login" class="back-link">← กลับหน้าหลัก</a>
+    
+    <div class="header">
+      <h1>🍔 สมัครสมาชิก</h1>
+      <p>เพื่อเก็บแต้มและรับสิทธิพิเศษ</p>
+    </div>
+
+    <% if (error.length > 0) { %>
+      <div class="alert alert-error">
+        <% error.forEach(msg => { %>
+          <%= msg %><br>
+        <% }); %>
+      </div>
+    <% } %>
+
+    <% if (success.length > 0) { %>
+      <div class="alert alert-success">
+        <% success.forEach(msg => { %>
+          <%= msg %><br>
+        <% }); %>
+      </div>
+    <% } %>
+
+    <form method="POST" action="/auth/member-register">
+      <div class="form-group">
+        <label for="name">ชื่อ-นามสกุล *</label>
+        <input type="text" id="name" name="name" required placeholder="เช่น สมชาย ใจดี">
+      </div>
+
+      <div class="form-group">
+        <label for="phone">เบอร์โทรศัพท์ *</label>
+        <input type="tel" id="phone" name="phone" required placeholder="เช่น 0812345678">
+      </div>
+
+      <div class="form-group">
+        <label for="email">อีเมล (ไม่บังคับ)</label>
+        <input type="email" id="email" name="email" placeholder="เช่น somchai@email.com">
+      </div>
+
+      <div class="form-group">
+        <label for="birthDate">วันเกิด (ไม่บังคับ)</label>
+        <input type="date" id="birthDate" name="birthDate">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">รหัสผ่าน *</label>
+          <input type="password" id="password" name="password" required placeholder="อย่างน้อย 6 ตัวอักษร">
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">ยืนยันรหัสผ่าน *</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="ยืนยันรหัสผ่าน">
+        </div>
+      </div>
+
+      <button type="submit" class="btn">สมัครสมาชิก</button>
+    </form>
+
+    <div class="login-link">
+      มีบัญชีแล้ว? <a href="/auth/member-login">เข้าสู่ระบบ</a>
+    </div>
+  </div>
+</body>
+</html>

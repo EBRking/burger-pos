@@ -1,0 +1,74 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">📋 <span>ประวัติการขาย</span></h1>
+    <a href="/sales/pos" class="btn btn-primary">🛒 หน้าขาย</a>
+  </div>
+
+  <% if (success && success.length > 0) { %><div class="alert alert-success">✅ <%= success[0] %></div><% } %>
+  <% if (error && error.length > 0) { %><div class="alert alert-danger">⚠️ <%= error[0] %></div><% } %>
+
+  <div class="card">
+    <form method="GET" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:flex-end;">
+      <div>
+        <label style="font-size:0.78rem; color:#999;">ค้นหารหัส</label>
+        <input type="text" name="search" class="form-control" placeholder="รหัสบิล..." value="<%= search %>" style="max-width:160px;">
+      </div>
+      <div>
+        <label style="font-size:0.78rem; color:#999;">จากวันที่</label>
+        <input type="date" name="dateFrom" class="form-control" value="<%= dateFrom %>">
+      </div>
+      <div>
+        <label style="font-size:0.78rem; color:#999;">ถึงวันที่</label>
+        <input type="date" name="dateTo" class="form-control" value="<%= dateTo %>">
+      </div>
+      <button type="submit" class="btn btn-primary">🔍 ค้นหา</button>
+      <a href="/sales" class="btn btn-secondary">✕ ล้าง</a>
+    </form>
+    <p style="font-size:0.8rem; color:#999; margin-bottom:12px;">พบ <%= total %> รายการ</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>รหัสบิล</th><th>พนักงาน</th><th>สมาชิก</th><th>ยอดรวม</th><th>ส่วนลด</th><th>ยอดสุทธิ</th><th>ช่องทาง</th><th>สถานะ</th><th>วันที่</th><th>จัดการ</th></tr>
+        </thead>
+        <tbody>
+          <% sales.forEach(s => { %>
+          <tr>
+            <td><a href="/sales/receipt/<%= s._id %>" style="color:var(--primary); font-weight:600;"><%= s.saleCode %></a></td>
+            <td><%= s.employee ? s.employee.name : '-' %></td>
+            <td><%= s.member ? s.member.name : 'ทั่วไป' %></td>
+            <td>฿<%= s.subtotal.toLocaleString('th-TH', {minimumFractionDigits:2}) %></td>
+            <td style="color:var(--danger);">-฿<%= s.discountAmount.toLocaleString('th-TH', {minimumFractionDigits:2}) %></td>
+            <td style="font-weight:700; color:var(--primary);">฿<%= s.total.toLocaleString('th-TH', {minimumFractionDigits:2}) %></td>
+            <td><span class="badge badge-info"><%= s.paymentMethod === 'cash' ? '💵 เงินสด' : s.paymentMethod === 'transfer' ? '📱 โอน' : '💳 บัตร' %></span></td>
+            <td><span class="badge <%= s.status === 'completed' ? 'badge-success' : 'badge-danger' %>"><%= s.status === 'completed' ? 'สำเร็จ' : 'ยกเลิก' %></span></td>
+            <td style="font-size:0.78rem;"><%= new Date(s.createdAt).toLocaleString('th-TH') %></td>
+            <td>
+              <a href="/sales/receipt/<%= s._id %>" class="btn btn-sm btn-secondary">🧾</a>
+              <% if (user.role === 'owner' && s.status === 'completed') { %>
+              <form method="POST" action="/sales/<%= s._id %>/cancel" style="display:inline;" onsubmit="return confirm('ยืนยันการยกเลิก?')">
+                <button type="submit" class="btn btn-sm btn-danger">✕</button>
+              </form>
+              <% } %>
+            </td>
+          </tr>
+          <% }) %>
+          <% if (sales.length === 0) { %>
+          <tr><td colspan="10" style="text-align:center; color:#999; padding:20px;">ไม่พบข้อมูลการขาย</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+    <div class="pagination">
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="?page=<%= i %>&search=<%= search %>&dateFrom=<%= dateFrom %>&dateTo=<%= dateTo %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+      <% } %>
+    </div>
+    <% } %>
+  </div>
+</div>
+</body></html>

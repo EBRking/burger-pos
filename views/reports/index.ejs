@@ -1,0 +1,38 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">📈 <span>รายงาน</span></h1>
+  </div>
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px;">
+    <a href="/reports/sales" style="text-decoration:none;">
+      <div class="card" style="text-align:center; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="font-size:3rem; margin-bottom:12px;">💰</div>
+        <h3 style="color:var(--primary-dark);">รายงานการขาย</h3>
+        <p style="color:#999; font-size:0.85rem; margin-top:6px;">ยอดขาย รายได้ วิธีชำระเงิน</p>
+      </div>
+    </a>
+    <a href="/reports/products" style="text-decoration:none;">
+      <div class="card" style="text-align:center; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="font-size:3rem; margin-bottom:12px;">🍟</div>
+        <h3 style="color:var(--primary-dark);">รายงานสินค้า</h3>
+        <p style="color:#999; font-size:0.85rem; margin-top:6px;">สินค้าขายดี หมวดหมู่ สต็อก</p>
+      </div>
+    </a>
+    <a href="/reports/members" style="text-decoration:none;">
+      <div class="card" style="text-align:center; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="font-size:3rem; margin-bottom:12px;">👥</div>
+        <h3 style="color:var(--primary-dark);">รายงานสมาชิก</h3>
+        <p style="color:#999; font-size:0.85rem; margin-top:6px;">สมาชิก VIP ยอดซื้อ แต้มสะสม</p>
+      </div>
+    </a>
+    <a href="/reports/employees" style="text-decoration:none;">
+      <div class="card" style="text-align:center; cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+        <div style="font-size:3rem; margin-bottom:12px;">👤</div>
+        <h3 style="color:var(--primary-dark);">รายงานพนักงาน</h3>
+        <p style="color:#999; font-size:0.85rem; margin-top:6px;">ยอดขายแต่ละคน ออเดอร์</p>
+      </div>
+    </a>
+  </div>
+</div>
+</body></html>

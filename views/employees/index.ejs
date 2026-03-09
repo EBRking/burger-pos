@@ -1,0 +1,51 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">👤 <span>จัดการพนักงาน</span></h1>
+    <a href="/employees/new" class="btn btn-primary">➕ เพิ่มพนักงาน</a>
+  </div>
+
+  <% if (success && success.length > 0) { %><div class="alert alert-success">✅ <%= success[0] %></div><% } %>
+  <% if (error && error.length > 0) { %><div class="alert alert-danger">⚠️ <%= error[0] %></div><% } %>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>รูป</th><th>ชื่อ</th><th>ชื่อผู้ใช้</th><th>บทบาท</th><th>เบอร์โทร</th><th>สถานะ</th><th>จัดการ</th></tr>
+        </thead>
+        <tbody>
+          <% employees.forEach(emp => { %>
+          <tr>
+            <td>
+              <% if (emp.profileImage) { %>
+                <img src="<%= emp.profileImage %>" class="profile-preview" style="width:40px;height:40px;" alt="">
+              <% } else { %>
+                <div style="width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;"><%= emp.name.charAt(0) %></div>
+              <% } %>
+            </td>
+            <td style="font-weight:600;"><%= emp.name %></td>
+            <td style="color:#999;"><%= emp.username %></td>
+            <td><span class="badge <%= emp.role === 'owner' ? 'badge-warning' : 'badge-info' %>"><%= emp.role === 'owner' ? '🔑 เจ้าของร้าน' : '👷 พนักงาน' %></span></td>
+            <td><%= emp.phone || '-' %></td>
+            <td><span class="badge <%= emp.isActive ? 'badge-success' : 'badge-danger' %>"><%= emp.isActive ? 'ใช้งาน' : 'ปิดใช้' %></span></td>
+            <td>
+              <a href="/employees/<%= emp._id %>/edit" class="btn btn-sm btn-secondary">✏️ แก้ไข</a>
+              <% if (emp._id.toString() !== user._id.toString()) { %>
+              <form method="POST" action="/employees/<%= emp._id %>/delete" style="display:inline;" onsubmit="return confirm('ยืนยันการลบ?')">
+                <button type="submit" class="btn btn-sm btn-danger">🗑️ ลบ</button>
+              </form>
+              <% } %>
+            </td>
+          </tr>
+          <% }) %>
+          <% if (employees.length === 0) { %>
+          <tr><td colspan="7" style="text-align:center; color:#999; padding:20px;">ไม่มีข้อมูลพนักงาน</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body></html>

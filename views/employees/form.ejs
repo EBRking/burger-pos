@@ -1,0 +1,83 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">👤 <span><%= title %></span></h1>
+    <a href="/employees" class="btn btn-secondary">← กลับ</a>
+  </div>
+
+  <% if (error && error.length > 0) { %><div class="alert alert-danger">⚠️ <%= error[0] %></div><% } %>
+
+  <div class="card" style="max-width:600px;">
+    <form method="POST" action="<%= employee ? '/employees/' + employee._id : '/employees' %>" enctype="multipart/form-data">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-group">
+          <label class="form-label">ชื่อ-นามสกุล *</label>
+          <input type="text" name="name" class="form-control" value="<%= employee ? employee.name : '' %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ชื่อผู้ใช้ *</label>
+          <input type="text" name="username" class="form-control" value="<%= employee ? employee.username : '' %>" <%= employee ? 'readonly' : 'required' %>>
+        </div>
+        <% if (!employee) { %>
+        <div class="form-group">
+          <label class="form-label">รหัสผ่าน *</label>
+          <input type="password" name="password" class="form-control" required>
+        </div>
+        <% } else { %>
+        <div class="form-group">
+          <label class="form-label">รหัสผ่านใหม่ (ว่างไว้ = ไม่เปลี่ยน)</label>
+          <input type="password" name="newPassword" class="form-control">
+        </div>
+        <% } %>
+        <div class="form-group">
+          <label class="form-label">บทบาท</label>
+          <select name="role" class="form-control">
+            <option value="employee" <%= employee && employee.role === 'employee' ? 'selected' : '' %>>👷 พนักงาน</option>
+            <option value="owner" <%= employee && employee.role === 'owner' ? 'selected' : '' %>>🔑 เจ้าของร้าน</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">เบอร์โทร</label>
+          <input type="text" name="phone" class="form-control" value="<%= employee ? employee.phone || '' : '' %>">
+        </div>
+        <div class="form-group">
+          <label class="form-label">อีเมล</label>
+          <input type="email" name="email" class="form-control" value="<%= employee ? employee.email || '' : '' %>">
+        </div>
+        <% if (employee) { %>
+        <div class="form-group">
+          <label class="form-label">สถานะ</label>
+          <select name="isActive" class="form-control">
+            <option value="true" <%= employee.isActive ? 'selected' : '' %>>ใช้งาน</option>
+            <option value="false" <%= !employee.isActive ? 'selected' : '' %>>ปิดใช้งาน</option>
+          </select>
+        </div>
+        <% } %>
+      </div>
+      <div class="form-group">
+        <label class="form-label">รูปโปรไฟล์</label>
+        <% if (employee && employee.profileImage) { %>
+          <div style="margin-bottom:8px;"><img src="<%= employee.profileImage %>" class="profile-preview" alt="profile"></div>
+        <% } %>
+        <input type="file" name="profileImage" class="form-control" accept="image/*" onchange="previewImg(this,'profilePrev')">
+        <img id="profilePrev" style="display:none; margin-top:8px;" class="profile-preview">
+      </div>
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button type="submit" class="btn btn-primary">💾 บันทึก</button>
+        <a href="/employees" class="btn btn-secondary">ยกเลิก</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+function previewImg(input, id) {
+  const img = document.getElementById(id);
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+</body></html>

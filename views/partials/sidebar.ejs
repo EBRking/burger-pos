@@ -1,0 +1,56 @@
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🍔</div>
+    <div>
+      <div class="logo-text">Burger POS</div>
+      <div class="logo-sub">ระบบขายหน้าร้าน</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">หลัก</div>
+    <a href="/dashboard" class="nav-item <%= title === 'แดชบอร์ด' ? 'active' : '' %>">
+      <span class="nav-icon">📊</span><span>แดชบอร์ด</span>
+    </a>
+    <a href="/sales/pos" class="nav-item <%= title === 'หน้าขาย POS' ? 'active' : '' %>">
+      <span class="nav-icon">🛒</span><span>หน้าขาย POS</span>
+    </a>
+    <a href="/sales" class="nav-item <%= title === 'ประวัติการขาย' ? 'active' : '' %>">
+      <span class="nav-icon">📋</span><span>ประวัติการขาย</span>
+    </a>
+
+    <div class="nav-section">จัดการ</div>
+    <a href="/products" class="nav-item <%= title && title.includes('สินค้า') ? 'active' : '' %>">
+      <span class="nav-icon">🍟</span><span>สินค้า</span>
+    </a>
+    <a href="/members" class="nav-item <%= title && title.includes('สมาชิก') ? 'active' : '' %>">
+      <span class="nav-icon">👥</span><span>สมาชิก</span>
+    </a>
+    <% if (user && user.role === 'owner') { %>
+    <a href="/employees" class="nav-item <%= title && title.includes('พนักงาน') ? 'active' : '' %>">
+      <span class="nav-icon">👤</span><span>พนักงาน</span>
+    </a>
+    <a href="/promotions" class="nav-item <%= title && title.includes('โปรโมชั่น') ? 'active' : '' %>">
+      <span class="nav-icon">🎁</span><span>โปรโมชั่น</span>
+    </a>
+    <a href="/reports" class="nav-item <%= title && title.includes('รายงาน') ? 'active' : '' %>">
+      <span class="nav-icon">📈</span><span>รายงาน</span>
+    </a>
+    <% } %>
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="user-info">
+      <% if (user && user.profileImage) { %>
+        <img src="<%= user.profileImage %>" class="user-avatar" alt="profile">
+      <% } else { %>
+        <div class="user-avatar"><%= user ? user.name.charAt(0).toUpperCase() : 'U' %></div>
+      <% } %>
+      <div>
+        <div class="user-name"><%= user ? user.name : '' %></div>
+        <div class="user-role"><%= user && user.role === 'owner' ? '🔑 เจ้าของร้าน' : '👷 พนักงาน' %></div>
+      </div>
+    </div>
+    <a href="/auth/logout" class="btn-logout">🚪 ออกจากระบบ</a>
+  </div>
+</aside>

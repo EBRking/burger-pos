@@ -1,0 +1,237 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content" style="padding:16px;">
+  <div class="page-header" style="margin-bottom:12px;">
+    <h1 class="page-title">🛒 <span>หน้าขาย POS</span></h1>
+    <a href="/sales" class="btn btn-secondary btn-sm">📋 ประวัติ</a>
+  </div>
+
+  <% if (error && error.length > 0) { %><div class="alert alert-danger">⚠️ <%= error[0] %></div><% } %>
+
+  <div class="pos-layout">
+    <!-- Products Panel -->
+    <div class="pos-products">
+      <div class="cat-filter">
+        <button class="cat-btn active" onclick="filterCat('all', this)">ทั้งหมด</button>
+        <button class="cat-btn" onclick="filterCat('burger', this)">🍔 เบอร์เกอร์</button>
+        <button class="cat-btn" onclick="filterCat('drink', this)">🥤 เครื่องดื่ม</button>
+        <button class="cat-btn" onclick="filterCat('side', this)">🍟 เมนูเสริม</button>
+        <button class="cat-btn" onclick="filterCat('dessert', this)">🍦 ของหวาน</button>
+        <button class="cat-btn" onclick="filterCat('combo', this)">🎁 คอมโบ</button>
+      </div>
+      <div class="product-grid" id="productGrid">
+        <% products.forEach(p => { %>
+        <div class="product-card" data-cat="<%= p.category %>" onclick="addToCart('<%= p._id %>', '<%= p.name.replace(/'/g, "\\'") %>', <%= p.price %>, '<%= p.image %>', <%= p.stock %>)">
+          <% if (p.image) { %>
+            <img src="<%= p.image %>" alt="<%= p.name %>">
+          <% } else { %>
+            <div class="no-img">🍔</div>
+          <% } %>
+          <div class="p-name"><%= p.name %></div>
+          <div class="p-price">฿<%= p.price.toLocaleString('th-TH') %></div>
+          <div class="p-stock">สต็อก: <%= p.stock %></div>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Cart Panel -->
+    <div class="pos-cart">
+      <div class="cart-header">🛒 รายการสั่งซื้อ</div>
+      <div class="cart-items" id="cartItems">
+        <p style="text-align:center; color:#ccc; padding:30px 0; font-size:0.85rem;">เลือกสินค้าจากด้านซ้าย</p>
+      </div>
+      <div class="cart-footer">
+        <!-- Member search -->
+        <div style="margin-bottom:10px;">
+          <div style="display:flex; gap:6px; margin-bottom:6px;">
+            <input type="text" id="memberPhone" class="form-control" placeholder="เบอร์โทรสมาชิก" style="font-size:0.8rem;">
+            <button onclick="searchMember()" class="btn btn-secondary btn-sm">🔍</button>
+          </div>
+          <div id="memberInfo" style="font-size:0.78rem; color:var(--primary); display:none;"></div>
+        </div>
+
+        <!-- Promotion -->
+        <div style="margin-bottom:10px;">
+          <select id="promotionSelect" class="form-control" style="font-size:0.8rem;" onchange="calcTotal()">
+            <option value="">-- ไม่ใช้โปรโมชั่น --</option>
+            <% promotions.forEach(promo => { %>
+            <option value="<%= promo._id %>" data-type="<%= promo.type %>" data-value="<%= promo.value %>" data-min="<%= promo.minAmount %>">
+              <%= promo.name %> (<%= promo.type === 'percent' ? promo.value + '%' : '฿' + promo.value %><%= promo.minAmount > 0 ? ' | ขั้นต่ำ ฿' + promo.minAmount : '' %>)
+            </option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Manual discount -->
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+          <select id="discountType" class="form-control" style="font-size:0.8rem; width:100px;" onchange="calcTotal()">
+            <option value="none">ไม่มีส่วนลด</option>
+            <option value="percent">% ส่วนลด</option>
+            <option value="amount">฿ ส่วนลด</option>
+          </select>
+          <input type="number" id="discountValue" class="form-control" placeholder="0" style="font-size:0.8rem;" oninput="calcTotal()" min="0">
+        </div>
+
+        <div class="cart-total-row"><span>ยอดรวม:</span><span id="subtotalDisplay">฿0.00</span></div>
+        <div class="cart-total-row" style="color:var(--danger);"><span>ส่วนลด:</span><span id="discountDisplay">฿0.00</span></div>
+        <div class="cart-total-row grand"><span>💰 ยอดสุทธิ:</span><span id="totalDisplay">฿0.00</span></div>
+
+        <!-- Payment -->
+        <div style="margin-top:10px;">
+          <select id="paymentMethod" class="form-control" style="font-size:0.8rem; margin-bottom:6px;">
+            <option value="cash">💵 เงินสด</option>
+            <option value="transfer">📱 โอนเงิน</option>
+            <option value="card">💳 บัตรเครดิต</option>
+          </select>
+          <div style="display:flex; gap:6px; margin-bottom:6px;">
+            <input type="number" id="amountPaid" class="form-control" placeholder="รับเงินมา" style="font-size:0.8rem;" oninput="calcChange()">
+            <div style="padding:8px; background:#FFF0DC; border-radius:6px; font-size:0.78rem; white-space:nowrap;">
+              ทอน: <strong id="changeDisplay">฿0.00</strong>
+            </div>
+          </div>
+          <textarea id="saleNote" class="form-control" placeholder="หมายเหตุ..." rows="2" style="font-size:0.8rem; margin-bottom:8px;"></textarea>
+          <button onclick="submitSale()" class="btn btn-success btn-lg" style="width:100%; justify-content:center;">
+            ✅ ชำระเงิน
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden form for submission -->
+<form id="saleForm" method="POST" action="/sales/pos" style="display:none;">
+  <input type="hidden" name="items" id="itemsInput">
+  <input type="hidden" name="memberId" id="memberIdInput">
+  <input type="hidden" name="promotionId" id="promotionIdInput">
+  <input type="hidden" name="discountType" id="discountTypeInput">
+  <input type="hidden" name="discountValue" id="discountValueInput">
+  <input type="hidden" name="paymentMethod" id="paymentMethodInput">
+  <input type="hidden" name="amountPaid" id="amountPaidInput">
+  <input type="hidden" name="note" id="noteInput">
+</form>
+
+<script>
+let cart = [];
+let memberId = '';
+let subtotal = 0;
+let discountAmount = 0;
+let total = 0;
+
+function filterCat(cat, btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.product-card').forEach(card => {
+    card.style.display = (cat === 'all' || card.dataset.cat === cat) ? '' : 'none';
+  });
+}
+
+function addToCart(id, name, price, image, stock) {
+  const existing = cart.find(i => i.productId === id);
+  if (existing) {
+    if (existing.quantity >= stock) { alert('สต็อกไม่เพียงพอ'); return; }
+    existing.quantity++;
+  } else {
+    cart.push({ productId: id, name, price, quantity: 1, stock });
+  }
+  renderCart();
+}
+
+function updateQty(id, delta) {
+  const idx = cart.findIndex(i => i.productId === id);
+  if (idx === -1) return;
+  cart[idx].quantity += delta;
+  if (cart[idx].quantity <= 0) cart.splice(idx, 1);
+  renderCart();
+}
+
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  if (cart.length === 0) {
+    container.innerHTML = '<p style="text-align:center; color:#ccc; padding:30px 0; font-size:0.85rem;">เลือกสินค้าจากด้านซ้าย</p>';
+    calcTotal();
+    return;
+  }
+  container.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-name">${item.name}</div>
+      <div class="cart-item-qty">
+        <button class="qty-btn" onclick="updateQty('${item.productId}', -1)">−</button>
+        <span style="min-width:24px; text-align:center; font-size:0.85rem;">${item.quantity}</span>
+        <button class="qty-btn" onclick="updateQty('${item.productId}', 1)">+</button>
+      </div>
+      <div class="cart-item-price">฿${(item.price * item.quantity).toLocaleString('th-TH', {minimumFractionDigits:2})}</div>
+    </div>
+  `).join('');
+  calcTotal();
+}
+
+function calcTotal() {
+  subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+  discountAmount = 0;
+
+  const promoSel = document.getElementById('promotionSelect');
+  const selOpt = promoSel.options[promoSel.selectedIndex];
+  if (promoSel.value && selOpt) {
+    const type = selOpt.dataset.type;
+    const val = parseFloat(selOpt.dataset.value) || 0;
+    const min = parseFloat(selOpt.dataset.min) || 0;
+    if (subtotal >= min) {
+      discountAmount = type === 'percent' ? subtotal * val / 100 : val;
+    }
+  } else {
+    const dtype = document.getElementById('discountType').value;
+    const dval = parseFloat(document.getElementById('discountValue').value) || 0;
+    if (dtype === 'percent') discountAmount = subtotal * dval / 100;
+    else if (dtype === 'amount') discountAmount = dval;
+  }
+
+  total = Math.max(0, subtotal - discountAmount);
+  document.getElementById('subtotalDisplay').textContent = '฿' + subtotal.toLocaleString('th-TH', {minimumFractionDigits:2});
+  document.getElementById('discountDisplay').textContent = '฿' + discountAmount.toLocaleString('th-TH', {minimumFractionDigits:2});
+  document.getElementById('totalDisplay').textContent = '฿' + total.toLocaleString('th-TH', {minimumFractionDigits:2});
+  calcChange();
+}
+
+function calcChange() {
+  const paid = parseFloat(document.getElementById('amountPaid').value) || 0;
+  const change = Math.max(0, paid - total);
+  document.getElementById('changeDisplay').textContent = '฿' + change.toLocaleString('th-TH', {minimumFractionDigits:2});
+}
+
+async function searchMember() {
+  const phone = document.getElementById('memberPhone').value.trim();
+  if (!phone) return;
+  const res = await fetch('/members/api/search?phone=' + encodeURIComponent(phone));
+  const data = await res.json();
+  const info = document.getElementById('memberInfo');
+  if (data.success) {
+    memberId = data.member._id;
+    info.innerHTML = `✅ สมาชิก: <strong>${data.member.name}</strong> (${data.member.memberCode}) แต้ม: ${data.member.points}`;
+    info.style.display = 'block';
+  } else {
+    memberId = '';
+    info.innerHTML = '❌ ไม่พบสมาชิก';
+    info.style.display = 'block';
+  }
+}
+
+function submitSale() {
+  if (cart.length === 0) { alert('กรุณาเลือกสินค้าอย่างน้อย 1 รายการ'); return; }
+  const paid = parseFloat(document.getElementById('amountPaid').value) || total;
+  if (document.getElementById('paymentMethod').value === 'cash' && paid < total) {
+    alert('จำนวนเงินที่รับมาไม่เพียงพอ'); return;
+  }
+  document.getElementById('itemsInput').value = JSON.stringify(cart.map(i => ({productId: i.productId, quantity: i.quantity})));
+  document.getElementById('memberIdInput').value = memberId;
+  document.getElementById('promotionIdInput').value = document.getElementById('promotionSelect').value;
+  document.getElementById('discountTypeInput').value = document.getElementById('discountType').value;
+  document.getElementById('discountValueInput').value = document.getElementById('discountValue').value || 0;
+  document.getElementById('paymentMethodInput').value = document.getElementById('paymentMethod').value;
+  document.getElementById('amountPaidInput').value = paid;
+  document.getElementById('noteInput').value = document.getElementById('saleNote').value;
+  document.getElementById('saleForm').submit();
+}
+</script>
+</body></html>

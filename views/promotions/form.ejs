@@ -1,0 +1,62 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">🎁 <span><%= title %></span></h1>
+    <a href="/promotions" class="btn btn-secondary">← กลับ</a>
+  </div>
+
+  <% if (error && error.length > 0) { %><div class="alert alert-danger">⚠️ <%= error[0] %></div><% } %>
+
+  <div class="card" style="max-width:500px;">
+    <form method="POST" action="<%= promotion ? '/promotions/' + promotion._id : '/promotions' %>">
+      <div class="form-group">
+        <label class="form-label">ชื่อโปรโมชั่น *</label>
+        <input type="text" name="name" class="form-control" value="<%= promotion ? promotion.name : '' %>" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">โค้ดโปรโมชั่น *</label>
+        <input type="text" name="code" class="form-control" value="<%= promotion ? promotion.code : '' %>" required style="text-transform:uppercase;">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-group">
+          <label class="form-label">ประเภทส่วนลด *</label>
+          <select name="type" class="form-control" required>
+            <option value="percent" <%= promotion && promotion.type === 'percent' ? 'selected' : '' %>>% ส่วนลด</option>
+            <option value="amount" <%= promotion && promotion.type === 'amount' ? 'selected' : '' %>>฿ ลดตรง</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">มูลค่าส่วนลด *</label>
+          <input type="number" name="value" class="form-control" value="<%= promotion ? promotion.value : '' %>" min="0" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ยอดซื้อขั้นต่ำ (฿)</label>
+          <input type="number" name="minAmount" class="form-control" value="<%= promotion ? promotion.minAmount : 0 %>" min="0">
+        </div>
+        <% if (promotion) { %>
+        <div class="form-group">
+          <label class="form-label">สถานะ</label>
+          <select name="isActive" class="form-control">
+            <option value="true" <%= promotion.isActive ? 'selected' : '' %>>ใช้งาน</option>
+            <option value="false" <%= !promotion.isActive ? 'selected' : '' %>>ปิดใช้งาน</option>
+          </select>
+        </div>
+        <% } %>
+        <div class="form-group">
+          <label class="form-label">วันเริ่มต้น *</label>
+          <input type="date" name="startDate" class="form-control" value="<%= promotion ? promotion.startDate.toISOString().split('T')[0] : '' %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">วันสิ้นสุด *</label>
+          <input type="date" name="endDate" class="form-control" value="<%= promotion ? promotion.endDate.toISOString().split('T')[0] : '' %>" required>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button type="submit" class="btn btn-primary">💾 บันทึก</button>
+        <a href="/promotions" class="btn btn-secondary">ยกเลิก</a>
+      </div>
+    </form>
+  </div>
+</div>
+</body></html>

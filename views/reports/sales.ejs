@@ -1,0 +1,86 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">💰 <span>รายงานการขาย</span></h1>
+    <a href="/reports" class="btn btn-secondary">← กลับ</a>
+  </div>
+
+  <div class="card">
+    <form method="GET" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+      <div><label style="font-size:0.78rem; color:#999;">จากวันที่</label>
+        <input type="date" name="dateFrom" class="form-control" value="<%= dateFrom %>"></div>
+      <div><label style="font-size:0.78rem; color:#999;">ถึงวันที่</label>
+        <input type="date" name="dateTo" class="form-control" value="<%= dateTo %>"></div>
+      <button type="submit" class="btn btn-primary">🔍 ดูรายงาน</button>
+    </form>
+  </div>
+
+  <div class="stat-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="stat-card green"><div class="stat-icon">💰</div>
+      <div><div class="stat-value">฿<%= totalRevenue.toLocaleString('th-TH', {minimumFractionDigits:2}) %></div><div class="stat-label">รายได้รวม</div></div></div>
+    <div class="stat-card orange"><div class="stat-icon">🛒</div>
+      <div><div class="stat-value"><%= totalOrders %></div><div class="stat-label">ออเดอร์ทั้งหมด</div></div></div>
+    <div class="stat-card"><div class="stat-icon">📊</div>
+      <div><div class="stat-value">฿<%= parseFloat(avgOrder).toLocaleString('th-TH') %></div><div class="stat-label">เฉลี่ยต่อออเดอร์</div></div></div>
+    <div class="stat-card red"><div class="stat-icon">🏷️</div>
+      <div><div class="stat-value">฿<%= totalDiscount.toLocaleString('th-TH', {minimumFractionDigits:2}) %></div><div class="stat-label">ส่วนลดรวม</div></div></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:2fr 1fr; gap:20px;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">📈 ยอดขายรายวัน</span></div>
+      <canvas id="dailyChart" height="120"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">💳 ช่องทางชำระเงิน</span></div>
+      <canvas id="payChart" height="160"></canvas>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:0;">
+    <div class="card-header"><span class="card-title">📋 รายการขาย</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>รหัสบิล</th><th>พนักงาน</th><th>สมาชิก</th><th>ยอดสุทธิ</th><th>ช่องทาง</th><th>วันที่</th></tr></thead>
+        <tbody>
+          <% sales.slice(0,50).forEach(s => { %>
+          <tr>
+            <td><a href="/sales/receipt/<%= s._id %>" style="color:var(--primary)"><%= s.saleCode %></a></td>
+            <td><%= s.employee ? s.employee.name : '-' %></td>
+            <td><%= s.member ? s.member.name : 'ทั่วไป' %></td>
+            <td style="font-weight:600;">฿<%= s.total.toLocaleString('th-TH', {minimumFractionDigits:2}) %></td>
+            <td><%= s.paymentMethod === 'cash' ? '💵 เงินสด' : s.paymentMethod === 'transfer' ? '📱 โอน' : '💳 บัตร' %></td>
+            <td style="font-size:0.78rem;"><%= new Date(s.createdAt).toLocaleString('th-TH') %></td>
+          </tr>
+          <% }) %>
+          <% if (sales.length === 0) { %><tr><td colspan="6" style="text-align:center;color:#999;padding:20px;">ไม่มีข้อมูล</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const daily = <%- JSON.stringify(daily) %>;
+new Chart(document.getElementById('dailyChart').getContext('2d'), {
+  type: 'line',
+  data: {
+    labels: daily.map(d => d.date),
+    datasets: [{ label: 'รายได้ (฿)', data: daily.map(d => d.revenue), borderColor: '#D2691E', backgroundColor: 'rgba(210,105,30,0.1)', tension: 0.4, fill: true }]
+  },
+  options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+});
+
+const pm = <%- JSON.stringify(paymentMap) %>;
+new Chart(document.getElementById('payChart').getContext('2d'), {
+  type: 'doughnut',
+  data: {
+    labels: ['เงินสด', 'โอนเงิน', 'บัตร'],
+    datasets: [{ data: [pm.cash||0, pm.transfer||0, pm.card||0], backgroundColor: ['#D2691E','#FF8C00','#FFD700'] }]
+  },
+  options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+</script>
+</body></html>

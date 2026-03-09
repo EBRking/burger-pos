@@ -1,0 +1,84 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">🍟 <span><%= title %></span></h1>
+    <a href="/products" class="btn btn-secondary">← กลับ</a>
+  </div>
+
+  <% if (error && error.length > 0) { %><div class="alert alert-danger">⚠️ <%= error[0] %></div><% } %>
+
+  <div class="card" style="max-width:600px;">
+    <form method="POST" action="<%= product ? '/products/' + product._id : '/products' %>" enctype="multipart/form-data">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">ชื่อสินค้า *</label>
+          <input type="text" name="name" class="form-control" value="<%= product ? product.name : '' %>" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">หมวดหมู่ *</label>
+          <select name="category" class="form-control" required>
+            <option value="">-- เลือกหมวดหมู่ --</option>
+            <option value="burger" <%= product && product.category === 'burger' ? 'selected' : '' %>>🍔 เบอร์เกอร์</option>
+            <option value="drink" <%= product && product.category === 'drink' ? 'selected' : '' %>>🥤 เครื่องดื่ม</option>
+            <option value="side" <%= product && product.category === 'side' ? 'selected' : '' %>>🍟 เมนูเสริม</option>
+            <option value="dessert" <%= product && product.category === 'dessert' ? 'selected' : '' %>>🍦 ของหวาน</option>
+            <option value="combo" <%= product && product.category === 'combo' ? 'selected' : '' %>>🎁 คอมโบ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">หน่วย</label>
+          <input type="text" name="unit" class="form-control" value="<%= product ? product.unit : 'ชิ้น' %>">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ราคาขาย (฿) *</label>
+          <input type="number" name="price" class="form-control" value="<%= product ? product.price : '' %>" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ต้นทุน (฿)</label>
+          <input type="number" name="cost" class="form-control" value="<%= product ? product.cost : '' %>" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">จำนวนสต็อก</label>
+          <input type="number" name="stock" class="form-control" value="<%= product ? product.stock : 0 %>" min="0">
+        </div>
+        <% if (product) { %>
+        <div class="form-group">
+          <label class="form-label">สถานะ</label>
+          <select name="isActive" class="form-control">
+            <option value="true" <%= product.isActive ? 'selected' : '' %>>ขายอยู่</option>
+            <option value="false" <%= !product.isActive ? 'selected' : '' %>>หยุดขาย</option>
+          </select>
+        </div>
+        <% } %>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">รายละเอียด</label>
+          <textarea name="description" class="form-control" rows="3"><%= product ? product.description || '' : '' %></textarea>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">รูปสินค้า</label>
+          <% if (product && product.image) { %>
+            <div style="margin-bottom:8px;"><img src="<%= product.image %>" class="img-preview" alt="product"></div>
+          <% } %>
+          <input type="file" name="image" class="form-control" accept="image/*" onchange="previewImg(this,'imgPrev')">
+          <img id="imgPrev" style="display:none; margin-top:8px;" class="img-preview">
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button type="submit" class="btn btn-primary">💾 บันทึก</button>
+        <a href="/products" class="btn btn-secondary">ยกเลิก</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+function previewImg(input, id) {
+  const img = document.getElementById(id);
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+</body></html>

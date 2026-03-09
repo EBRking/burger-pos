@@ -1,0 +1,99 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">🍟 <span>จัดการสินค้า</span></h1>
+    <% if (user.role === 'owner') { %>
+    <a href="/products/new" class="btn btn-primary">➕ เพิ่มสินค้า</a>
+    <% } %>
+  </div>
+
+  <% if (success && success.length > 0) { %><div class="alert alert-success">✅ <%= success[0] %></div><% } %>
+  <% if (error && error.length > 0) { %><div class="alert alert-danger">⚠️ <%= error[0] %></div><% } %>
+
+  <!-- Analysis Stats -->
+  <div class="stat-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="stat-card green">
+      <div class="stat-icon">📦</div>
+      <div><div class="stat-value"><%= stats.totalProducts %></div><div class="stat-label">สินค้าทั้งหมด</div></div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-icon">🏪</div>
+      <div><div class="stat-value"><%= stats.totalStock %></div><div class="stat-label">สต็อกรวม</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div><div class="stat-value">฿<%= parseFloat(stats.avgPrice).toLocaleString('th-TH') %></div><div class="stat-label">ราคาเฉลี่ย</div></div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">⚠️</div>
+      <div><div class="stat-value"><%= stats.lowStock %></div><div class="stat-label">สินค้าใกล้หมด (≤5)</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <form method="GET" style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+      <input type="text" name="search" class="form-control" placeholder="ค้นหาสินค้า..." value="<%= search %>" style="max-width:250px;">
+      <select name="category" class="form-control" style="max-width:160px;">
+        <option value="">ทุกหมวดหมู่</option>
+        <option value="burger" <%= category === 'burger' ? 'selected' : '' %>>🍔 เบอร์เกอร์</option>
+        <option value="drink" <%= category === 'drink' ? 'selected' : '' %>>🥤 เครื่องดื่ม</option>
+        <option value="side" <%= category === 'side' ? 'selected' : '' %>>🍟 เมนูเสริม</option>
+        <option value="dessert" <%= category === 'dessert' ? 'selected' : '' %>>🍦 ของหวาน</option>
+        <option value="combo" <%= category === 'combo' ? 'selected' : '' %>>🎁 คอมโบ</option>
+      </select>
+      <button type="submit" class="btn btn-primary">🔍 ค้นหา</button>
+      <% if (search || category) { %><a href="/products" class="btn btn-secondary">✕ ล้าง</a><% } %>
+    </form>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>รูป</th><th>รหัส</th><th>ชื่อสินค้า</th><th>หมวด</th><th>ราคา</th><th>ต้นทุน</th><th>กำไร</th><th>สต็อก</th><th>สถานะ</th><th>จัดการ</th></tr>
+        </thead>
+        <tbody>
+          <% const catLabel = {burger:'🍔 เบอร์เกอร์', drink:'🥤 เครื่องดื่ม', side:'🍟 เมนูเสริม', dessert:'🍦 ของหวาน', combo:'🎁 คอมโบ'}; %>
+          <% products.forEach(p => { %>
+          <tr>
+            <td>
+              <% if (p.image) { %>
+                <img src="<%= p.image %>" style="width:45px;height:45px;object-fit:cover;border-radius:6px;" alt="">
+              <% } else { %>
+                <div style="width:45px;height:45px;background:#FFF0DC;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🍔</div>
+              <% } %>
+            </td>
+            <td style="font-size:0.78rem; color:#999;"><%= p.productCode %></td>
+            <td style="font-weight:600;"><%= p.name %></td>
+            <td><span class="badge badge-primary"><%= catLabel[p.category] || p.category %></span></td>
+            <td style="font-weight:600; color:var(--primary);">฿<%= p.price.toLocaleString('th-TH') %></td>
+            <td style="color:#999;">฿<%= p.cost.toLocaleString('th-TH') %></td>
+            <td>
+              <span style="color:<%= (p.price - p.cost) > 0 ? 'var(--success)' : 'var(--danger)' %>; font-weight:600;">
+                ฿<%= (p.price - p.cost).toLocaleString('th-TH') %>
+              </span>
+            </td>
+            <td>
+              <span class="badge <%= p.stock <= 5 ? 'badge-danger' : p.stock <= 20 ? 'badge-warning' : 'badge-success' %>">
+                <%= p.stock %> <%= p.unit %>
+              </span>
+            </td>
+            <td><span class="badge <%= p.isActive ? 'badge-success' : 'badge-danger' %>"><%= p.isActive ? 'ขายอยู่' : 'หยุดขาย' %></span></td>
+            <td>
+              <% if (user.role === 'owner') { %>
+              <a href="/products/<%= p._id %>/edit" class="btn btn-sm btn-secondary">✏️</a>
+              <form method="POST" action="/products/<%= p._id %>/delete" style="display:inline;" onsubmit="return confirm('ยืนยันการลบ?')">
+                <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+              </form>
+              <% } %>
+            </td>
+          </tr>
+          <% }) %>
+          <% if (products.length === 0) { %>
+          <tr><td colspan="10" style="text-align:center; color:#999; padding:20px;">ไม่พบสินค้า</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,8 @@
+node_modules/
+.env
+public/uploads/products/*
+public/uploads/profiles/*
+!public/uploads/products/.gitkeep
+!public/uploads/profiles/.gitkeep
+*.log
+.DS_Store

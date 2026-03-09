@@ -1,0 +1,50 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">🎁 <span>จัดการโปรโมชั่น</span></h1>
+    <a href="/promotions/new" class="btn btn-primary">➕ เพิ่มโปรโมชั่น</a>
+  </div>
+
+  <% if (success && success.length > 0) { %><div class="alert alert-success">✅ <%= success[0] %></div><% } %>
+  <% if (error && error.length > 0) { %><div class="alert alert-danger">⚠️ <%= error[0] %></div><% } %>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>ชื่อโปรโมชั่น</th><th>โค้ด</th><th>ประเภท</th><th>มูลค่า</th><th>ขั้นต่ำ</th><th>วันเริ่ม</th><th>วันสิ้นสุด</th><th>สถานะ</th><th>จัดการ</th></tr>
+        </thead>
+        <tbody>
+          <% promotions.forEach(p => { %>
+          <% const now = new Date(); const isExpired = new Date(p.endDate) < now; %>
+          <tr>
+            <td style="font-weight:600;"><%= p.name %></td>
+            <td><span class="badge badge-primary"><%= p.code %></span></td>
+            <td><span class="badge badge-info"><%= p.type === 'percent' ? '% ส่วนลด' : '฿ ลดตรง' %></span></td>
+            <td style="font-weight:600; color:var(--danger);"><%= p.type === 'percent' ? p.value + '%' : '฿' + p.value %></td>
+            <td>฿<%= p.minAmount.toLocaleString('th-TH') %></td>
+            <td style="font-size:0.8rem;"><%= new Date(p.startDate).toLocaleDateString('th-TH') %></td>
+            <td style="font-size:0.8rem;"><%= new Date(p.endDate).toLocaleDateString('th-TH') %></td>
+            <td>
+              <span class="badge <%= p.isActive && !isExpired ? 'badge-success' : 'badge-danger' %>">
+                <%= isExpired ? 'หมดอายุ' : p.isActive ? 'ใช้งาน' : 'ปิดใช้' %>
+              </span>
+            </td>
+            <td>
+              <a href="/promotions/<%= p._id %>/edit" class="btn btn-sm btn-secondary">✏️</a>
+              <form method="POST" action="/promotions/<%= p._id %>/delete" style="display:inline;" onsubmit="return confirm('ยืนยันการลบ?')">
+                <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+              </form>
+            </td>
+          </tr>
+          <% }) %>
+          <% if (promotions.length === 0) { %>
+          <tr><td colspan="9" style="text-align:center; color:#999; padding:20px;">ไม่มีโปรโมชั่น</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body></html>

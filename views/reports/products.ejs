@@ -1,0 +1,66 @@
+<%- include('../partials/head') %>
+<%- include('../partials/sidebar') %>
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">🍟 <span>รายงานสินค้า</span></h1>
+    <a href="/reports" class="btn btn-secondary">← กลับ</a>
+  </div>
+
+  <div class="card">
+    <form method="GET" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+      <div><label style="font-size:0.78rem; color:#999;">จากวันที่</label>
+        <input type="date" name="dateFrom" class="form-control" value="<%= dateFrom %>"></div>
+      <div><label style="font-size:0.78rem; color:#999;">ถึงวันที่</label>
+        <input type="date" name="dateTo" class="form-control" value="<%= dateTo %>"></div>
+      <button type="submit" class="btn btn-primary">🔍 ดูรายงาน</button>
+    </form>
+  </div>
+
+  <div style="display:grid; grid-template-columns:2fr 1fr; gap:20px;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">🏆 สินค้าขายดี Top 10</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>อันดับ</th><th>ชื่อสินค้า</th><th>จำนวนขาย</th><th>รายได้</th></tr></thead>
+          <tbody>
+            <% productStats.slice(0,10).forEach((p, i) => { %>
+            <tr>
+              <td><span class="badge <%= i === 0 ? 'badge-warning' : i === 1 ? 'badge-info' : 'badge-primary' %>"><%= i+1 %></span></td>
+              <td style="font-weight:600;"><%= p.name %></td>
+              <td><%= p.qty %> ชิ้น</td>
+              <td style="color:var(--primary); font-weight:600;">฿<%= p.revenue.toLocaleString('th-TH', {minimumFractionDigits:2}) %></td>
+            </tr>
+            <% }) %>
+            <% if (productStats.length === 0) { %><tr><td colspan="4" style="text-align:center;color:#999;padding:20px;">ไม่มีข้อมูล</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">📦 สินค้าตามหมวดหมู่</span></div>
+      <canvas id="catChart" height="200"></canvas>
+      <% const catLabel = {burger:'🍔 เบอร์เกอร์', drink:'🥤 เครื่องดื่ม', side:'🍟 เมนูเสริม', dessert:'🍦 ของหวาน', combo:'🎁 คอมโบ'}; %>
+      <% Object.entries(categoryMap).forEach(([cat, data]) => { %>
+      <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); font-size:0.82rem;">
+        <span><%= catLabel[cat] || cat %></span>
+        <span><%= data.count %> รายการ | สต็อก <%= data.stock %></span>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const catMap = <%- JSON.stringify(categoryMap) %>;
+const catLabels = {burger:'เบอร์เกอร์', drink:'เครื่องดื่ม', side:'เมนูเสริม', dessert:'ของหวาน', combo:'คอมโบ'};
+new Chart(document.getElementById('catChart').getContext('2d'), {
+  type: 'pie',
+  data: {
+    labels: Object.keys(catMap).map(k => catLabels[k] || k),
+    datasets: [{ data: Object.values(catMap).map(v => v.count), backgroundColor: ['#D2691E','#FF8C00','#FFD700','#8B4513','#F4A460'] }]
+  },
+  options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+</script>
+</body></html>
